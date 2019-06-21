@@ -69,29 +69,6 @@ def head(a,b):
 def closest_same_digits(n):
     return (int(closest_same_digits_h(n, head)), int(closest_same_digits_h(n, add)), int(closest_same_digits_h(n, sub)))
 
-def closest_same_digits_h_old(n, f):
-    n_len = len(n)
-    mid = get_mid(n_len)
-    mid_index = mid - 1
-
-    if is_odd(n_len):
-        n_0 = n[:mid_index] + n[mid_index] + reverse_str(n[:mid_index])
-    else:
-        n_0 = n[:mid_index+1] + reverse_str(n[:mid_index+1])
-
-    n_1 = list(n_0)
-
-    mid = n[mid_index]
-    new_mid = str(max(0,f(int(mid),1)))
-
-    if is_odd(n_len):
-        n_1[mid_index] = new_mid
-    else:
-        n_1[mid_index] = new_mid
-        n_1[mid_index+1] = new_mid
-
-    return ''.join(n_1)
-
 def closest_same_digits_h(n, f):
     n_len = len(n)
     mid = get_mid(n_len)
@@ -114,31 +91,34 @@ def closest_same_digits_h(n, f):
         n_1[mid_index+1] = new_mid
 
     return ''.join(n_1)
-    
-assert(closest_same_digits_h("101", sub) == "111")
-assert(closest_same_digits_h("121", sub) == "111")
-assert(closest_same_digits_h("1111", sub) == "1001")
-assert(closest_same_digits_h("1221", sub) == "1111")
-assert(closest_same_digits_h("89023482", head) == "89022098")
-print(closest_same_digits_h("06", head))
-assert(closest_same_digits_h("06", head) == "00")
-assert(closest_same_digits_h("1283", add) == "1331")
 
-def d(a, b):
-    return abs(a-b)
+def closest_same_digits_split(a, b):
+    left = a[::-1]
+    right = b
 
-def it_method(n):
+    assert(len(left) == len(right))
+    n = len(left)
+
+    for i in range(n):
+        if left[i] == right[i]:
+            continue
+
+def closest_same_digits_h_new(n):
     n_len = len(n)
     mid = get_mid(n_len)
     mid_index = mid - 1
 
-    if n_len < 2:
-        return MAX_INT
-
     if is_odd(n_len):
-        n_0 = n[:mid_index] + n[mid_index] + reverse_str(n[:mid_index])
+        left, right = closest_same_digits_split(n[:mid_index], n[mid_index+1:])
+        n_0 = left + n[mid_index] + right
     else:
-        n_0 = n[:mid_index+1] + reverse_str(n[:mid_index+1])
+        left, right = closest_same_digits_split(n[:mid_index+1], n[mid_index+1:])
+        n_0 = left + right
+
+    return n_0
+
+def d(a, b):
+    return abs(a-b)
 
 def x(n):
     int_n = int(n)
@@ -159,6 +139,12 @@ def x(n):
 
     return str(all[d_arr.index(min_d)])
 
+assert(closest_same_digits_h("121", sub) == "111")
+assert(closest_same_digits_h("1111", sub) == "1001")
+assert(closest_same_digits_h("1221", sub) == "1111")
+assert(closest_same_digits_h("89023482", head) == "89022098")
+assert(closest_same_digits_h("06", head) == "00")
+assert(closest_same_digits_h("1283", add) == "1331")
 
 assert(closest_one_more_digit(1) == 11)
 assert(closest_one_more_digit(2) == 101)
@@ -187,4 +173,4 @@ assert(x("8") == "7")
 assert(x("10") == "9")
 assert(x("89023482") == "89022098")
 assert(x("1283") == "1331")
-# assert(x("1325060231") == "1325005231")
+assert(x("1325060231") == "1325005231")
