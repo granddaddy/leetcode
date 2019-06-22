@@ -17,8 +17,8 @@ def x(pattern,string):
     return y(string,pattern)
 
 def y(s,p):
-
     sols = []
+    visited = {}
     sols.append((s,p))
 
     while True:
@@ -26,6 +26,10 @@ def y(s,p):
             return False
 
         s_0, p_0 = sols.pop(0)
+        if (s_0, p_0) in visited:
+            continue
+        else:
+            visited[(s_0, p_0)] = True
 
         if s_0 == p_0:
             return True
@@ -48,7 +52,8 @@ def y(s,p):
 
         else:
             if p_f == QU:
-                sols.append((s_0[1:], p_0[1:]))
+                if s_f:
+                    sols.append((s_0[1:], p_0[1:]))
                 continue
 
             else:
@@ -56,7 +61,6 @@ def y(s,p):
                 sols.append((s_0, p_0[1:]))
                 # one case
                 sols.append((s_0[1:], p_0))
-                print(sols)
                 continue
 
 assert(x("a", "a") == True)
