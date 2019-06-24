@@ -4,15 +4,20 @@ class TreeNode:
         self.left = None
         self.right = None
 
+def get_max(p):
+    a = sum(p)
+    b = p[0] + p[2]
+    c = p[1] + p[2]
+    d = p[2]
+    m = max(a,b,c,d)
+
+    return m
+
 def get_max_path(paths):
     print(paths)
     mm = sum(paths[0])
     for p in paths:
-        a = sum(p)
-        b = p[0] + p[2]
-        c = p[1] + p[2]
-        d = p[2]
-        m = max(a,b,c,d)
+        m = get_max(p)
         if m > mm:
             mm = m
 
@@ -20,9 +25,13 @@ def get_max_path(paths):
 
 def update_parent(paths, node):
     curr_node = node
-    if node.val < 0:
-        return
+    local_max = node.val
     while True:
+        m = get_max(paths[curr_node.index])
+        if m > local_max:
+            local_max = m
+        if m <= 0:
+            return local_max
         if curr_node.parent != None:
             my_vals = paths[curr_node.index]
             max_1_chain = max(my_vals[:2]) + curr_node.val
@@ -37,13 +46,15 @@ def update_parent(paths, node):
         else:
             break
 
-def reduce_paths(paths):
-    return list(map(lambda x: sum(x), paths))
+    return local_max
 
 class Solution:
     def maxPathSum(self, root: TreeNode) -> int:
+        max = root.val
+
         q = [] # maintains DFS traversal
         paths = [] # maintains node ordering
+        nodes = []
 
         q.append(root)
         root.parent = None
@@ -54,6 +65,7 @@ class Solution:
             node = q.pop(0)
             node.index = len(paths)
             paths.append([0,0,node.val])
+            nodes.append(node)
 
             if node.left != None:
                 node.left.parent = node
@@ -63,11 +75,12 @@ class Solution:
                 node.right.parent = node
                 q.append(node.right)
 
-            update_parent(paths, node)
+        for node in nodes:
+            m = update_parent(paths, node)
+            if m > max:
+                max = m
 
-        max = get_max_path(paths)
         return max
-
 
 def stringToTreeNode(input):
     input = input.strip()
