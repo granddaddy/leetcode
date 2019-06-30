@@ -1,48 +1,55 @@
-import copy
-
 class Solution:
     def wordBreak(self, s, wordDict):
 
         possible_outputs = []
+        cache = {}
 
-        (words, curr, remaining) = ([], "", s)
-        possible_outputs.append((words, curr, remaining))
+        (words, remaining) = ("", s)
+        possible_outputs.append((words, remaining))
 
         ans = []
         while True:
-            # print(possible_outputs)
+            print(len(possible_outputs))
             if not possible_outputs:
                 break
 
-            words, curr, remaining = possible_outputs.pop(0)
+            words, remaining = possible_outputs.pop()
 
-            curr += remaining[0]
-            new_remaining = remaining[1:]
-
-            if curr in wordDict:
-                new_words = copy.deepcopy(words)
-                new_words.append(curr)
-
-                if not new_remaining:
-                    ans.append(new_words)
-                    continue
-
-                new_curr = ""
-                possible_outputs.append((new_words, new_curr, new_remaining))
-
-            if not new_remaining:
+            if not remaining:
+                if words:
+                    ans.append(words)
                 continue
 
-            possible_outputs.append((words, curr, new_remaining))
+            if remaining in cache:
+                it = cache[remaining]
+                cached = True
+            else:
+                it = wordDict
+                cached = False
 
-        s_ans = []
-        for a in ans:
-            s_ans.append(' '.join(a))
+            c_words = []
 
-        # print(s_ans)
-        return s_ans
+            for i in it:
+                if cached:
+                    word, new_remaining = i[0], i[1]
+                elif remaining.startswith(i):
+                    word = i
+                    new_remaining = remaining[len(word):]
+                    c_words.append((word, new_remaining))
+                else:
+                    continue
 
+                if words:
+                    new_words = words+' '+word
+                else:
+                    new_words = word
 
+                possible_outputs.append((new_words, new_remaining))
+
+            if not cached:
+                cache[remaining] = c_words
+
+        return ans
 
 sol = Solution()
 s = "catsanddog"
@@ -75,3 +82,9 @@ out = sol.wordBreak(s, wordDict)
 assert(len(out) == len(Output))
 for k in Output:
     assert(k in out)
+
+s = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+wordDict = ["a","aa","aaa","aaaa","aaaaa","aaaaaa","aaaaaaa","aaaaaaaa","aaaaaaaaa","aaaaaaaaaa"]
+# import cProfile
+# cProfile.run('sol.wordBreak(s, wordDict)')
+out = sol.wordBreak(s, wordDict)
