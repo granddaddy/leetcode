@@ -1,55 +1,28 @@
+from functools import lru_cache
+
 class Solution:
-    def wordBreak(self, s, wordDict):
+    @lru_cache(None)
+    def helper(self, s):
+        words = []
+        if not s:
+            return []
 
-        possible_outputs = []
-        cache = {}
-
-        (words, remaining) = ("", s)
-        possible_outputs.append((words, remaining))
-
-        ans = []
-        while True:
-            print(len(possible_outputs))
-            if not possible_outputs:
-                break
-
-            words, remaining = possible_outputs.pop()
-
-            if not remaining:
-                if words:
-                    ans.append(words)
+        for w in self.wordDict:
+            if w == s:
+                words.append(s)
                 continue
 
-            if remaining in cache:
-                it = cache[remaining]
-                cached = True
-            else:
-                it = wordDict
-                cached = False
+            if s.startswith(w):
+                others = self.helper(s[len(w):])
+                for o in others:
+                    words.append(w+" "+o)
 
-            c_words = []
+        return words
 
-            for i in it:
-                if cached:
-                    word, new_remaining = i[0], i[1]
-                elif remaining.startswith(i):
-                    word = i
-                    new_remaining = remaining[len(word):]
-                    c_words.append((word, new_remaining))
-                else:
-                    continue
+    def wordBreak(self, s, wordDict):
+        self.wordDict = wordDict
+        return self.helper(s)
 
-                if words:
-                    new_words = words+' '+word
-                else:
-                    new_words = word
-
-                possible_outputs.append((new_words, new_remaining))
-
-            if not cached:
-                cache[remaining] = c_words
-
-        return ans
 
 sol = Solution()
 s = "catsanddog"
@@ -87,4 +60,4 @@ s = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 wordDict = ["a","aa","aaa","aaaa","aaaaa","aaaaaa","aaaaaaa","aaaaaaaa","aaaaaaaaa","aaaaaaaaaa"]
 # import cProfile
 # cProfile.run('sol.wordBreak(s, wordDict)')
-out = sol.wordBreak(s, wordDict)
+# out = sol.wordBreak(s, wordDict)
