@@ -31,23 +31,26 @@ class Solution:
             if not p:
                 break
             _s, _n = p.pop(0)
-            if _s in visited:
-                continue
-            else:
-                visited[_s] = True
-            if is_valid(_s):
-                if not n:
-                    n = _n
-                else:
-                    if _n < n:
-                        break
+            if n and _n < n:
+                break
 
-                ans.append(_s)
 
             for i in range(0, _n):
                 l = _s[:i]
                 r = _s[i+1:]
-                p.append((l+r, _n-1))
+                # p.append((l+r, _n-1))
+                child_s = l+r
+
+                if child_s not in visited:
+                    visited[child_s] = True
+                    if is_valid(child_s):
+                        ans.append(child_s)
+                        if not n:
+                            n = _n
+                    else:
+                        p.append((child_s, _n - 1))
+
+
 
         # print(n)
         # print(ans)
