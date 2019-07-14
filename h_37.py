@@ -16,12 +16,25 @@ def to_int(p):
         i += 1
 
 def inv_to_int(p):
-    i = 0
-    while p > 0:
+    for i in range(9):
         if p & 1 == 0:
-            return i + 1
+            break
         p = p >> 1
-        i += 1
+    return i + 1
+
+def subBoxRange(sub_b_i, sub_b_j):
+    _i = 0
+    _j = 0
+
+    while _i < 3:
+        ret_i = sub_b_i * 3 + _i
+        ret_j = sub_b_j * 3 + _j
+        yield(ret_i, ret_j)
+
+        _j += 1
+        if _j == 3:
+            _i += 1
+            _j = 0
 
 class Solution:
 
@@ -37,32 +50,18 @@ class Solution:
                 i += 1
                 j = 0
 
-    def subBoxRange(self, sub_b_i, sub_b_j):
-        _i = 0
-        _j = 0
-
-        while _i < 3:
-            ret_i = sub_b_i + _i
-            ret_j = sub_b_j + _i
-            yield(ret_i, ret_j)
-
-            _j += 1
-            if _j == 3:
-                _i += 1
-                _j = 0
-
     def solveSudoku(self, board):
         """
         Do not return anything, modify board in-place instead.
         """
-        print(board)
+        # print(board)
         d_s = {}
 
         r_ix = {}
         c_ix = {}
         sb_ix = {}
 
-        def addIdx(i, j):
+        def addIdx(i, j, p):
             if i in r_ix:
                 r_ix[i][j] = True
             else:
@@ -77,9 +76,45 @@ class Solution:
             if (x, y) in sb_ix:
                 sb_ix[(x,y)][(i,j)] = True
             else:
-                sb_ix[(x,y)]  = {(i,j): True}
+                sb_ix[(x,y)] = {(i,j): True}
 
-        def findPoss(i, j):
+        def update(i, j, p):
+            if (i, j) not in d_s:
+                return
+            # print(i, j, p)
+            old = d_s[(i,j)]
+
+            if p:
+                new = old | to_bit(p)
+                d_s[(i,j)] = new
+            else:
+                new = old
+
+            _count = bin(new).count("1")
+            if _count == 8:
+                _new = inv_to_int(new)
+                board[i][j] = str(_new)
+                # print("setting", i, j, new, _new)
+
+
+                x, y = getSubBox(i, j)
+
+                r_ix[i].pop(j)
+                c_ix[j].pop(i)
+                sb_ix[(x,y)].pop((i,j))
+                d_s.pop((i,j))
+
+                rr = list(r_ix[i].keys())
+                for _j in rr:
+                    update(i, _j, _new)
+                cc = list(c_ix[j].keys())
+                for _i in cc:
+                    update(_i, j, _new)
+                ss = list(sb_ix[(x,y)].keys())
+                for _i, _j in ss:
+                    update(_i, _j, _new)
+
+        def visit(i, j):
             # row
             r = 0
             for x in board[i]:
@@ -94,30 +129,29 @@ class Solution:
 
             s = 0
             sub_b_i, sub_b_j = getSubBox(i, j)
-            for _i, _j in self.subBoxRange(sub_b_i, sub_b_j):
+            for _i, _j in subBoxRange(sub_b_i, sub_b_j):
                 x = board[_i][_j]
                 if x != '.':
                     s |= to_bit(int(x))
 
             p = r | c | s
 
-            _count = bin(p).count("1")
-            if _count == 8:
-                _p = inv_to_int(p)
-                board[i][j] = str(_p)
-            else:
-                d_s[(i,j)] = p
-                addIdx(i, j)
+            addIdx(i, j, p)
+            d_s[(i,j)] = p
 
         for i, j in self.firstPass():
             if board[i][j] == '.':
-                findPoss(i, j)
+                visit(i, j)
 
-        print(board)
-        print(d_s)
+        # print(d_s)
 
-s = Solution()
-s.solveSudoku([["5","3",".",".","7",".",".",".","."],["6",".",".","1","9","5",".",".","."],[".","9","8",".",".",".",".","6","."],["8",".",".",".","6",".",".",".","3"],["4",".",".","8",".","3",".",".","1"],["7",".",".",".","2",".",".",".","6"],[".","6",".",".",".",".","2","8","."],[".",".",".","4","1","9",".",".","5"],[".",".",".",".","8",".",".","7","9"]])
+        dd = list(d_s.keys())
+        for i, j in dd:
+            update(i, j, 0)
+
+        # for _r in board:
+        #     print(_r)
+        # print(d_s)
 
 assert(getSubBox(0, 0) == (0, 0))
 assert(getSubBox(3, 0) == (1, 0))
@@ -132,5 +166,15 @@ p = 0
 for i in range(1,10):
     if i != 7:
         p |= to_bit(int(i))
-
 assert(inv_to_int(p) == 7)
+p = 0
+for i in range(1,10):
+    if i != 9:
+        p |= to_bit(int(i))
+assert(inv_to_int(p) == 9)
+
+sub_b_i, sub_b_j = getSubBox(6, 4)
+# print(list(subBoxRange(sub_b_i, sub_b_j)))
+
+s = Solution()
+s.solveSudoku([["5","3",".",".","7",".",".",".","."],["6",".",".","1","9","5",".",".","."],[".","9","8",".",".",".",".","6","."],["8",".",".",".","6",".",".",".","3"],["4",".",".","8",".","3",".",".","1"],["7",".",".",".","2",".",".",".","6"],[".","6",".",".",".",".","2","8","."],[".",".",".","4","1","9",".",".","5"],[".",".",".",".","8",".",".","7","9"]])
