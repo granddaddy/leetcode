@@ -78,7 +78,10 @@ class Trie:
         if curr.val == curr_word and curr.is_word_end:
             return True
 
-        if curr.val == curr_word[:curr.val_len]:
+        if curr.val and curr.val != curr_word[:curr.val_len]:
+            return False
+
+        if curr.val_len:
             curr_word = curr_word[curr.val_len:]
 
         for c in curr.children.values():
@@ -90,10 +93,14 @@ class Trie:
         return self.search_helper(self.head, word)
 
     def starts_with_helper(self, curr, curr_word):
-        if curr.val and curr.val.startswith(curr_word):
-            return True
+        if curr.val:
+            if curr.val.startswith(curr_word):
+                return True
 
-        if curr.val == curr_word[:curr.val_len]:
+            if curr.val != curr_word[:curr.val_len]:
+                return False
+
+        if curr.val_len:
             curr_word = curr_word[curr.val_len:]
 
         for c in curr.children.values():
@@ -112,13 +119,17 @@ trie.insert("apl");
 trie.insert("appz");
 trie.insert("bacon");
 trie.print()
+print("###")
 print(trie.search("apple"));
 print(trie.search("app"));
 print(trie.search("apl"));
+print(trie.search("aple"));
 print(trie.search("ap"));
+print(trie.search("a"));
 print("###")
 print(trie.startsWith("app"));
 print(trie.startsWith("ap"));
 print(trie.startsWith("a"));
 print(trie.startsWith("ape"));
+print(trie.startsWith("aple"));
 print(trie.startsWith("appp"));
