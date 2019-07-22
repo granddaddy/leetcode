@@ -40,6 +40,20 @@ class LFUCache:
         parent.tail = new_child
         return new_child
 
+    def insert_0_children(self, parent, child_key):
+        # print("append_children", parent.val, child_key)
+        new_child = Node(child_key)
+        parent.children[child_key] = new_child
+
+        new_child.next = parent.head
+        if parent.head:
+            parent.head.prev = new_child
+
+        if not parent.tail:
+            parent.tail = new_child
+        parent.head = new_child
+        return new_child
+
     def remove_children(self, parent, child_key):
         # print("remove_children", parent.val, child_key)
         child = parent.children.pop(child_key)
@@ -60,7 +74,10 @@ class LFUCache:
     def add_inv(self, _level, key):
         # print("add_inv", _level, key)
         if _level not in self.d_count_inv.children:
-            self.append_children(self.d_count_inv, _level)
+            if _level == 1:
+                self.insert_0_children(self.d_count_inv, _level)
+            else:
+                self.append_children(self.d_count_inv, _level)
 
         level = self.d_count_inv.children[_level]
 
@@ -146,8 +163,22 @@ class LFUCache:
 # cache.get(3);
 # cache.get(4);
 
-print("**********************")
+# print("**********************")
+#
+# cache = LFUCache(1);
+# cache.put(0, 0);
+# cache.get(0);
 
-cache = LFUCache(1);
-cache.put(0, 0);
-cache.get(0);
+i_0 = ["LFUCache","put","put","get","get","get","put","put","get","get","get","get"]
+i_1 = [[3],[2,2],[1,1],[2],[1],[2],[3,3],[4,4],[3],[2],[1],[4]]
+
+c = None
+for i in range(len(i_0)):
+    fu = i_0[i]
+    inp = i_1[i]
+    if fu == "LFUCache":
+        c = LFUCache(*inp)
+    elif fu == "put":
+        c.put(*inp)
+    elif fu == "get":
+        c.get(*inp)
