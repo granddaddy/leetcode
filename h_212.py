@@ -9,12 +9,11 @@ class Solution:
         M = len(board[0])
 
         dirs = [
-                (-1,-1), (-1,0), (-1,1),
+                (-1,0),
                 (0,-1), (0,1),
-                (1,-1), (1,0), (1,1)
+                (1,0)
                ]
 
-        # words.sort()
         words_d = {}
 
         for w in words:
@@ -30,9 +29,8 @@ class Solution:
 
         def find(s_i, s_j, poss_words):
             f_words = []
-            curr = [(s_i, s_j, 0)]
 
-            def traverse(i, l_d, pw):
+            def traverse(i, l_d, pw, curr, visited):
                 l_i, l_j, _ = curr[i-1]
                 for di in range(l_d + 1, len(dirs)):
                     pd = dirs[di]
@@ -42,13 +40,16 @@ class Solution:
                     n_i = l_i + i_m
                     n_j = l_j + j_m
 
-                    if in_board(n_i, n_j) and \
+                    if (n_i, n_j) not in visited and \
+                        in_board(n_i, n_j) and \
                         board[n_i][n_j] == pw[i]:
                         return (n_i, n_j, di)
 
                 return None
 
             for pw in poss_words:
+                curr = [(s_i, s_j, 0), (-1, -1, -1)]
+                visited = {(s_i, s_j): True}
                 n = len(pw)
                 if n == 1:
                     f_words.append(pw)
@@ -58,21 +59,23 @@ class Solution:
                     if i == 0:
                         break
 
-                    if i < len(curr):
-                        ld = curr[i][2]
-                    else:
-                        ld = -1
-                        curr.append(None)
+                    lc = curr[i]
+                    ld = lc[2]
+                    if ld != -1:
+                        visited.pop((lc[0],lc[1]))
 
-                    pt = traverse(i, ld, pw)
+                    pt = traverse(i, ld, pw, curr, visited)
+                    if pt:
+                        visited[(pt[0], pt[1])] = True
                     curr[i] = pt
 
                     if not pt:
                         i -= 1
-                        curr.pop()
+                        lt = curr.pop()
 
                     elif i < n - 1:
                         i += 1
+                        curr.append((-1,-1,-1))
                         continue
 
                     elif i == n - 1:
@@ -90,6 +93,8 @@ class Solution:
                     if _find:
                         for fw in _find:
                             poss_words.remove(fw)
+                        if not poss_words:
+                            words_d.pop(l)
                         ret.extend(_find)
 
         return ret
