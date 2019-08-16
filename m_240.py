@@ -100,9 +100,9 @@ class Solution:
             _, new_max_m = _mx
 
             if get(_mn) <= target:
-                new_min_m = min(new_min_m + 1, new_max_m)
+                new_min_m = min(new_min_m + 1, old_max_m)
             if get(_mx) >= target:
-                new_max_m = max(new_max_m - 1, new_min_m)
+                new_max_m = max(new_max_m - 1, old_min_m)
 
             old = (old_min_n, old_max_n, old_min_m, old_max_m)
             new = (new_min_n, new_max_n, new_min_m, new_max_m)
